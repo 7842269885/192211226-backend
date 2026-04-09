@@ -5,12 +5,37 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("http://localhost:5050");
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "GrowsmartAPI", Version = "v1" });
+    // Use FullName for schema IDs to avoid name collisions across controllers
+    c.CustomSchemaIds(type => type.FullName);
+    // Resolve any remaining route ambiguities by picking the first matching action
+    c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+});
+
+// Fix missing wwwroot when running from bin folder
+var contentRoot = builder.Environment.ContentRootPath;
+var wwwrootPath = Path.Combine(contentRoot, "wwwroot");
+if (!Directory.Exists(wwwrootPath))
+{
+    var projectRoot = Path.GetFullPath(Path.Combine(contentRoot, "..", "..", ".."));
+    var projectWwwroot = Path.Combine(projectRoot, "wwwroot");
+    if (Directory.Exists(projectWwwroot))
+    {
+        builder.Environment.WebRootPath = projectWwwroot;
+    }
+}
 
 // Configure Entity Framework MySQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -95,10 +120,11 @@ app.UseStaticFiles();
 
 
 // Configure the HTTP request pipeline.
+app.UseSwagger();
+app.UseSwaggerUI();
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
     // Disable HTTPS redirection in dev to avoid protocol mismatch on port 5050
 }
 else 

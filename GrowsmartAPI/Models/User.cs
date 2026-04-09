@@ -25,8 +25,13 @@ public class User
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // Navigation property
+    // Navigation properties
+    [JsonIgnore]
     public Profile? Profile { get; set; }
+    
+    [JsonIgnore]
     public ICollection<Plant> Plants { get; set; } = new List<Plant>();
+    
+    [JsonIgnore]
     public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }
