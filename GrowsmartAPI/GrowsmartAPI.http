@@ -1,0 +1,6 @@
+@GrowsmartAPI_HostAddress = http://localhost:5196
+
+GET {{GrowsmartAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
