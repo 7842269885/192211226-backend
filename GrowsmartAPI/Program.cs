@@ -75,7 +75,7 @@ var app = builder.Build();
 // Automatically apply migrations and seed database
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
+    var services = scope.ServiceProvider;git 
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
